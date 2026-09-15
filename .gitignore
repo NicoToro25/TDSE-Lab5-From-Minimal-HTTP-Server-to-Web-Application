@@ -1,4 +1,9 @@
 ﻿target/
-.settings/
-.classpath
-.project
+.metals/
+.bloop/
+.vscode/
+*.class
+.DS_Store
+Thumbs.db
+*.pem
+*.env
