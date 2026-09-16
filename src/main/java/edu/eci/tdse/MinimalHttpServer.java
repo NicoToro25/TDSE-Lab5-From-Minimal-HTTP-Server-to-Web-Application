@@ -3,6 +3,7 @@ package edu.eci.tdse;
 import java.io.*;
 import java.net.*;
 import java.nio.file.*;
+import java.util.Map;
 
 public class MinimalHttpServer {
 
@@ -72,16 +73,29 @@ public class MinimalHttpServer {
             // Quitar query string si la hay (la usaremos en la sección 4)
             int queryIndex = path.indexOf('?');
             String cleanPath = (queryIndex == -1) ? path : path.substring(0, queryIndex);
+            String query = (queryIndex == -1) ? null : path.substring(queryIndex + 1);
 
+            Map<String, String> queryParams = QueryStringParser.parse(query);
+            int[] statusOut = new int[1];
+            String serviceJson = HardcodedServices.handle(cleanPath, queryParams, statusOut);
+
+            if (serviceJson != null) {
+                // Es uno de los servicios hardcoded: responder a un JSON
+                byte[] bodyBytes = serviceJson.getBytes("UTF-8");
+                sendResponse(rawOut, statusOut[0], statusText(statusOut[0]),
+                            "application/json; charset=UTF-8", bodyBytes);
+                return;
+            }
+
+            // No es un servicio: intentar como un recurso estático
             Path resource = resourceResolver.resolve(cleanPath);
             if (resource == null) {
-                sendError(rawOut, 404, "Not Found");
+                sendError(rawOut, 404, "NotFound");
                 return;
             }
 
             byte[] bodyBytes = Files.readAllBytes(resource);
             String contentType = ContentTypeResolver.resolve(resource.getFileName().toString());
-
             sendResponse(rawOut, 200, "OK", contentType, bodyBytes);
 
         } finally {
@@ -105,5 +119,15 @@ public class MinimalHttpServer {
         byte[] body = ("<html><body><h1>" + status + " " + statusText + "</h1></body></html>")
             .getBytes("UTF-8");
         sendResponse(out, status, statusText, "text/html; charset=UTF-8", body);
+    }
+
+    private static String statusText(int status) {
+        return switch (status) {
+            case 200 -> "OK";
+            case 400 -> "Bad Request";
+            case 404 -> "Not Found";
+            case 405 -> "Method Not Allowed";
+            default -> "Error";
+        };
     }
 }
