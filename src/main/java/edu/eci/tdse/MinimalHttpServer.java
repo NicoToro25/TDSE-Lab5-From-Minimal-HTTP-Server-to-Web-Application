@@ -63,7 +63,7 @@ public class MinimalHttpServer {
             }
             String method = parts[0];
             String path = parts[1];
-
+ha
             if (!method.equals("GET")) {
                 sendError(rawOut, 405, "Method Not Allowed");
                 return;
