@@ -3,13 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab 5 - Networking</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Lab 5 - Mini Web App</title>
 </head>
 <body>
-    <h1>Lab 5 - Networking</h1>
+    <h1>Lab 5 - Networking Mini Web Application</h1>
     <img src="/images/logo.jpeg" alt="Logo" width="100">
     <br>
     <img src="/images/logo2.jpeg" alt="Logo 2" width="100">
+
+    <section>
+        <h2> Greeting Service </h2>
+        <form id="greeting-form">
+            <label for="greeting-name">Name:</label>
+            <input type="text" id="greeting-name" name="name" required>
+            <button type="submit">Say Hello</button>
+        </form>
+    </section>
+
+    <section>
+        <h2> Square Sevrice </h2>
+        <form id="square-form">
+            <label for="square-value">Number:</label>
+            <input type="number" id="square-value" name="value" step="any" required>
+            <button type="submit">Calculate Square</button>
+        </form>
+    </section>
+
+    <section>
+        <h2> Time Service </h2>
+        <form id="time-form">
+            <button type="submit">Get Server Time</button>
+        </form>
+    </section>
+
+    <section>
+        <p id="loading" style="display: none;">Loading...</p>
+        <p id="result" style="color: green;"></p>
+        <p id="error" style="color: red;"></p>
+    </section>
+
+    <script src="/app.js"></script>
 </body>
 </html>
