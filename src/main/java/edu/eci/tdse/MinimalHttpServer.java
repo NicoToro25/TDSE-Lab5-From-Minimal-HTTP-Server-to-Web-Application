@@ -10,7 +10,7 @@ public class MinimalHttpServer {
 	private static ResourceResolver resourceResolver;
 
 	public static void main(String[] args) throws IOException {
-		int port = 35000;
+		int port = resolvePort(args);
 
 		// Ubicacion de los recursos públicos dentro del classpath compilado
 		Path publicRoot = Paths.get("src/main/resources/public");
@@ -28,6 +28,28 @@ public class MinimalHttpServer {
 				System.err.println("Error al manejar la conexión con el cliente: " + e.getMessage());
 			}
 		}
+	}
+
+	private static int resolvePort(String[] args) {
+		// Prioridad: argumento de línea de comandos > variable de entorno > default
+		if (args.length > 0) {
+			try {
+				return Integer.parseInt(args[0]);
+			} catch (NumberFormatException e) {
+				System.err.println("Puerto inválido en argumento, usando default.");
+			}
+		}
+
+		String envPort = System.getenv("SERVER_PORT");
+		if (envPort != null) {
+			try {
+				return Integer.parseInt(envPort);
+			} catch (NumberFormatException e) {
+				System.err.println("Puerto inválido en variable de entorno, usando default.");
+			}
+		}
+
+		return 35000; // default
 	}
 
 	private static void handleClient(Socket clientSocket) throws IOException {
