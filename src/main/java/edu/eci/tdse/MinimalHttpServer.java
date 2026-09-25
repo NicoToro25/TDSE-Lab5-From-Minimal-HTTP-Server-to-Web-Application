@@ -11,23 +11,41 @@ public class MinimalHttpServer {
 
 	public static void main(String[] args) throws IOException {
 		int port = resolvePort(args);
+		Path publicRoot = resolvePublicRoot();
 
-		// Ubicacion de los recursos públicos dentro del classpath compilado
-		Path publicRoot = Paths.get("src/main/resources/public");
 		resourceResolver = new ResourceResolver(publicRoot);
 
 		ServerSocket serverSocket = new ServerSocket(port);
-		System.out.println("Servidor HTTP escuchando en el puerto " + port + "...");
+		System.out.println("Servidor escuchando en el puerto " + port + "...");
+		System.out.println("Sirviendo recursos desde: " + publicRoot.toAbsolutePath());
 
 		while (true) {
 			Socket clientSocket = serverSocket.accept();
-			System.out.println("Cliente conectado: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
 			try {
 				handleClient(clientSocket);
 			} catch (IOException e) {
-				System.err.println("Error al manejar la conexión con el cliente: " + e.getMessage());
+				System.err.println("Error manejando el cliente: " + e.getMessage());
 			}
 		}
+	}
+
+	private static Path resolvePublicRoot() {
+		// En desarrollo (mvn exec:java desde la raíz del proyecto), los recursos
+		// están en src/main/resources/public.
+		Path devPath = Paths.get("src/main/resources/public");
+		if (Files.exists(devPath)) {
+			return devPath;
+		}
+
+		// En EC2 (jar empaquetado), la carpeta "public" vive junto al jar,
+		// en el directorio de trabajo actual.
+		Path deployedPath = Paths.get("public");
+		if (Files.exists(deployedPath)) {
+			return deployedPath;
+		}
+
+		throw new IllegalStateException(
+				"No se encontró la carpeta de recursos públicos ni en '" + devPath + "' ni en '" + deployedPath + "'");
 	}
 
 	private static int resolvePort(String[] args) {
